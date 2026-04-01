@@ -1,0 +1,61 @@
+event_vision_model:
+  type: GET
+  parameters:
+    patch_size: 4
+    embed_dim: 48
+    depths: [2, 2, 8, 8]
+    num_heads: [3, 6, 12, 24]
+    window_size: 8
+    mlp_ratio: 3.0
+    drop_rate: 0.2
+    attn_drop_rate: 0.0
+    drop_path_rate: 0.2
+    use_checkpoint: False
+    embed_split: 12
+    group_num: 12
+  projection_dim: 128
+  num_event_tokens: 64
+  checkpoint: 'checkpoint/simclr_bs=1024_tau=0.1_head=linear_best.pth.tar'
+
+data:
+  data_path: ['/data/storage/anastasia/data/N-Caltech101',
+              '/data/storage/anastasia/data/N-Cars',
+              '/data/storage/anastasia/data/N-ImageNet',
+              '/data/storage/anastasia/data/CIFAR10DVS/events_np',
+              '/data/storage/anastasia/data/DailyDvs-200']
+  sensor_size: [480, 640]
+  ref_resolution: 240
+  batch_size: 128
+  num_workers: 2
+  augmentation:
+    max_shift: 50
+    hor_flip_p: 0.5
+    time_flip_p: 0.8
+    center_p: 0.5
+    time_crop_p: 0.8
+    time_drop_ratio: 0.1
+    area_drop_ratio: 0.1
+    point_drop_ratio: 0.1
+    noise_std: 0.1
+    include_augmentations: ['flip', 'time_flip', 'point_drop', 'time_crop', 'time_drop']
+    verbose: False
+
+train:
+  optimizer:
+    lr: 0.0002
+    weight_decay: 0.05
+  objective:
+    name: classification
+    temperature: 0.07
+    label_smoothing: 0.1
+  scheduler:
+    name: 'cosine_restarts'
+    first_cycle_steps: 20000
+    cycle_mult: 1.0
+    warmup_steps: 5000
+    gamma: 0.1
+    last_epoch: -1
+    max_lr: 1.0e-4
+    min_lr: 1.0e-5
+  max_grad_norm: 1.0
+  num_epochs: 200

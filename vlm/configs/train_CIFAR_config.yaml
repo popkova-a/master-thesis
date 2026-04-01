@@ -1,0 +1,47 @@
+event_vision_model:
+  type: GET
+  parameters:
+    patch_size: 4
+    num_classes: 1024
+    embed_dim: 48
+    depths: [2, 2, 8]
+    num_heads: [3, 6, 12]
+    window_size: 8
+    mlp_ratio: 4.0
+    drop_rate: 0.2
+    attn_drop_rate: 0.0
+    drop_path_rate: 0.2
+    use_checkpoint: False
+    embed_split: 12
+    group_num: 12
+  num_event_tokens: 64
+
+vision_language_model:
+  type: DeepSeek-VL
+  model_path: "deepseek-ai/deepseek-vl-1.3b-base"
+  dtype: float32
+
+data:
+  data_path: "/data/storage/anastasia/data/CIFAR10DVS"
+  sensor_size: [128, 128]
+  ref_resolution: 128
+  batch_size: 128
+
+train:
+  optimizer:
+    lr: 0.0002
+    weight_decay: 0.05
+  objective:
+    name: classification
+    label_smoothing: 0.1
+  scheduler:
+    name: 'cosine_restarts'
+    first_cycle_steps: 14000
+    cycle_mult: 1.0
+    warmup_steps: 5000
+    gamma: 0.1
+    last_epoch: -1
+    max_lr: [5.0e-5, 1.0e-4]
+    min_lr: [1.0e-5, 5.0e-5]
+  max_grad_norm: 5.0
+  num_epochs: 100
